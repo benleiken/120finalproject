@@ -17,8 +17,6 @@
 @property (strong, nonatomic) IBOutlet UIButton *viewAll;
 @property (strong, nonatomic) IBOutlet UIButton *hideAll;
 
-@property (nonatomic, strong) UIRefreshControl * refresher;
-
 @property (strong, nonatomic) NSArray * returnedMessages;
 @property (strong, nonatomic) NSMutableArray * messages;
 
@@ -39,6 +37,7 @@
    
    self.messages = [[NSMutableArray alloc] init];
    
+
    self.messagesTable.hidden = YES;
    self.messagesTable.delegate = self;
    self.messagesTable.dataSource = self;
@@ -54,7 +53,7 @@
    [self.refresher addTarget:self action:@selector(getMessages) forControlEvents:UIControlEventValueChanged];
    */
    
-   tableViewController.refreshControl = self.refresher;
+   //tableViewController.refreshControl = self.refresher;
 	// Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -93,7 +92,7 @@
 
 - (void) endRefresh
 {
-   [self.refresher endRefreshing];
+   //[self.refresher endRefreshing];
 }
 
 - (void)didReceiveMemoryWarning
@@ -148,6 +147,7 @@
                                 [alert3 performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:YES];
                                 
                                 self.total ++;
+
                              }
                              else {
                                 UIAlertView *alert1 = [[UIAlertView alloc] initWithTitle: @"Failure" message: @"Something went terribly wrong..."delegate: nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
@@ -165,11 +165,12 @@
    }
    
    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat: @"http://0.0.0.0:3000/messages/%d.json", self.offset]];
+
    
    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url
                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:20.0];
    
-   
+
    [request setHTTPMethod:@"GET"];
    
    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
@@ -180,7 +181,7 @@
                           completionHandler:^(NSURLResponse *response, NSData *responseData, NSError *error) {
                              if (error == nil) {
                                 
-                                NSString * jsonString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
+                                 NSString * jsonString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
                                 
                                 NSData *jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
                                 self.returnedMessages = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
@@ -204,6 +205,7 @@
                                 [alert1 performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:YES];
                              }
                           }];
+
    
 }
 
@@ -211,6 +213,7 @@
    self.messagesTable.hidden = NO;
    self.hideAll.hidden = NO;
    self.viewAll.hidden = YES;
+
 }
 
 
@@ -302,4 +305,5 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
       [self getMessages];
    }
 }
+
 @end
