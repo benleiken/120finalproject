@@ -17,8 +17,6 @@
 @property (strong, nonatomic) IBOutlet UIButton *viewAll;
 @property (strong, nonatomic) IBOutlet UIButton *hideAll;
 
-@property (nonatomic, strong) UIRefreshControl * refresher;
-
 @property (strong, nonatomic) NSArray * returnedMessages;
 
 
@@ -33,30 +31,13 @@
    self.usernameField.delegate = self;
    self.messageField.delegate = self;
    
-   
    self.messagesTable.hidden = YES;
    self.messagesTable.delegate = self;
    self.messagesTable.dataSource = self;
    
    self.hideAll.hidden = YES;
    
-   UITableViewController *tableViewController = [[UITableViewController alloc] init];
-   tableViewController.tableView = self.messagesTable;
-   
-   
-   
-   self.refresher = [[UIRefreshControl alloc] init];
-   self.refresher.attributedTitle = [[NSAttributedString alloc] initWithString:@"Pull to Refresh"];
-   [self.refresher addTarget:self action:@selector(getMessages) forControlEvents:UIControlEventValueChanged];
-   
-   
-   tableViewController.refreshControl = self.refresher;
 	// Do any additional setup after loading the view, typically from a nib.
-}
-
-- (void) endRefresh
-{
-   [self.refresher endRefreshing];
 }
 
 - (void)didReceiveMemoryWarning
@@ -112,8 +93,6 @@
                                 UIAlertView *alert3 = [[UIAlertView alloc] initWithTitle: @"Success!" message: @"Message Submitted" delegate: nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
                                 
                                 [alert3 performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:YES];
-                                
-                                
                              }
                              else {
                                 UIAlertView *alert1 = [[UIAlertView alloc] initWithTitle: @"Failure" message: @"Something went terribly wrong..."delegate: nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
@@ -123,14 +102,18 @@
                           }];
 }
 
-- (void) getMessages
-{
+- (IBAction)show:(id)sender {
+   self.messagesTable.hidden = NO;
+   self.hideAll.hidden = NO;
+   self.viewAll.hidden = YES;
+   
+   
    NSURL *url = [NSURL URLWithString:@"http://0.0.0.0:3000/messages.json"];
    
    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url
                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:20.0];
    
-   
+
    [request setHTTPMethod:@"GET"];
    
    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
@@ -141,7 +124,7 @@
                           completionHandler:^(NSURLResponse *response, NSData *responseData, NSError *error) {
                              if (error == nil) {
                                 
-                                NSString * jsonString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
+                                 NSString * jsonString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
                                 
                                 NSData *jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
                                 self.returnedMessages = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
@@ -157,7 +140,6 @@
                                 dispatch_async(dispatch_get_main_queue(), ^{
                                    [self.messagesTable reloadData];
                                 });
-                                [self endRefresh];
                              }
                              else {
                                 UIAlertView *alert1 = [[UIAlertView alloc] initWithTitle: @"Failure" message: @"Something went terribly wrong..."delegate: nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
@@ -165,16 +147,6 @@
                                 [alert1 performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:YES];
                              }
                           }];
-   
-}
-
-- (IBAction)show:(id)sender {
-   self.messagesTable.hidden = NO;
-   self.hideAll.hidden = NO;
-   self.viewAll.hidden = YES;
-   
-   [self getMessages];
-
 
    
    
@@ -237,11 +209,7 @@
 }
 
 
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
-   if (scrollView.contentOffset.y <= - 65.0f) {
-      // fetch extra data & reload table view
-   }
-}
+
 
 
 
