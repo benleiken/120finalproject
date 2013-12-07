@@ -79,6 +79,16 @@
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jZE-JU-3sl">
+                                <rect key="frame" x="110" y="414" width="100" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="View as Pages">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="pagesViewAction:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="p8t-So-yBH"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
@@ -86,6 +96,7 @@
                         <outlet property="hideAll" destination="Igl-4P-IUe" id="nsD-Xk-3Iy"/>
                         <outlet property="messageField" destination="jfd-Ft-ktt" id="w9r-hu-j7I"/>
                         <outlet property="messagesTable" destination="BUQ-7k-9Ec" id="9mB-ul-NZM"/>
+                        <outlet property="pagesViewButton" destination="jZE-JU-3sl" id="1Oq-LC-wxb"/>
                         <outlet property="submitButton" destination="fcU-5O-df6" id="wVp-5w-Aha"/>
                         <outlet property="usernameField" destination="ekH-mo-z85" id="vGh-GF-hdz"/>
                         <outlet property="viewAll" destination="eaA-aC-890" id="yEj-ij-pIo"/>

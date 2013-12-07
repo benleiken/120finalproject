@@ -20,7 +20,7 @@ class MessagesController < ApplicationController
   end
 
   def length
-    @length = Message.size()
+    @length = Message.count()
   end
 
 

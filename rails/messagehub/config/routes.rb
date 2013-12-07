@@ -2,7 +2,8 @@ Messagehub::Application.routes.draw do
   get 'messages/' => 'messages#index' , :format => true
   post 'messages/' => 'messages#create'
   #get 'messages/:id' => 'messages#show'
-  get 'messages/:offset' => 'messages#selection'
+  get 'messages/length/' => 'messages#length'
+  get 'messages/selection/:offset' => 'messages#selection'
   root 'messages#index'
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

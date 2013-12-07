@@ -7,11 +7,15 @@
 //
 
 #import "ViewController.h"
+#import "MessageView.h"
+
+#define INITIAL_PAGE_LOAD 3
 
 @interface ViewController () <UITextFieldDelegate, NSURLConnectionDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate>
 @property (strong, nonatomic) IBOutlet UITextField *usernameField;
 @property (strong, nonatomic) IBOutlet UITextField *messageField;
 @property (strong, nonatomic) IBOutlet UIButton *submitButton;
+@property (strong, nonatomic) IBOutlet UIButton *pagesViewButton;
 
 @property (strong, nonatomic) IBOutlet UITableView *messagesTable;
 @property (strong, nonatomic) IBOutlet UIButton *viewAll;
@@ -22,6 +26,10 @@
 
 @property (assign ,nonatomic) int offset;
 @property (assign, nonatomic) int total;
+
+@property (nonatomic, strong) UIScrollView *scrollView;
+@property (nonatomic, strong) UIPageControl *pageControl;
+@property (nonatomic, strong) NSCache *views;
 
 @end
 
@@ -39,6 +47,8 @@
    
 
    self.messagesTable.hidden = YES;
+   self.pagesViewButton.hidden = YES;
+   
    self.messagesTable.delegate = self;
    self.messagesTable.dataSource = self;
    
@@ -59,7 +69,7 @@
 
 - (void) getCount
 {
-   NSURL *url = [NSURL URLWithString:@"http://0.0.0.0:3000/messages.json"];
+   NSURL *url = [NSURL URLWithString:@"http://0.0.0.0:3000/messages/length.json"];
    
    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url
                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:20.0];
@@ -78,8 +88,8 @@
                                 NSString * jsonString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
                                 
                                 NSData *jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-                                NSArray * msg = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
-                                self.total = [msg count];
+                                NSDictionary * msg = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
+                                self.total = [[msg objectForKey:@"length"] intValue];
                              }
                              else {
                                 UIAlertView *alert1 = [[UIAlertView alloc] initWithTitle: @"Failure" message: @"Something went terribly wrong..."delegate: nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
@@ -99,6 +109,7 @@
 {
     [super didReceiveMemoryWarning];
 }
+
 - (IBAction)done:(id)sender {
    
    [self.usernameField resignFirstResponder];
@@ -157,6 +168,149 @@
                           }];
 }
 
+- (IBAction)pagesViewAction:(id)sender {
+   CGRect bounds = [[UIScreen mainScreen] bounds];
+   CGRect subviewFrame = CGRectMake(0, 0, bounds.size.width, bounds.size.height);
+   self.scrollView = [[UIScrollView alloc] initWithFrame:subviewFrame];
+   self.scrollView.backgroundColor = [UIColor whiteColor];
+   self.scrollView.maximumZoomScale = 1.0;
+   self.scrollView.minimumZoomScale = 1.0;
+   self.scrollView.clipsToBounds = YES;
+   self.scrollView.showsHorizontalScrollIndicator = NO;
+   self.scrollView.scrollEnabled = YES;
+   self.scrollView.pagingEnabled = YES;
+   
+   [self setupUI];
+   
+   [self.view addSubview:self.hideAll];
+
+   
+   
+}
+
+-(void)setupUI
+{
+   
+   
+   NSCache *views = [[NSCache alloc] init];
+   for (NSUInteger i = 0; i < self.total; i++)
+   {
+      [views setObject:[NSNull null] forKey:@((int)i)];
+   }
+   self.views = views;
+   
+   
+   self.scrollView.contentSize = CGSizeMake(CGRectGetWidth(self.scrollView.frame) *self.total, CGRectGetHeight(self.scrollView.frame));
+   self.scrollView.delegate = self;
+   self.scrollView.backgroundColor = [UIColor whiteColor];
+   
+   self.pageControl = [[UIPageControl alloc] initWithFrame:self.scrollView.frame];
+   self.pageControl.numberOfPages = self.total;
+   self.pageControl.currentPage = 0;
+   [self.view addSubview:self.pageControl];
+   
+   
+   [self.view addSubview:self.scrollView];
+   
+   
+   for(int i= self.pageControl.currentPage; i < self.pageControl.currentPage + INITIAL_PAGE_LOAD; i++){
+      if(self.total > self.offset){
+         [self getMessages];
+      }
+      if(self.pageControl.currentPage - i >= 0){
+         [self loadScrollViewWithOffset:self.pageControl.currentPage - i];
+      }
+   }
+   [self gotoOffset:NO];
+   
+}
+
+- (void)loadScrollViewWithOffset:(NSUInteger)offset
+{
+
+   CGRect bounds = [[UIScreen mainScreen] bounds];
+   CGFloat offsetTop = 0;
+   
+   // replace the placeholder if necessary
+   
+   NSDictionary * msg = self.messages[offset];
+
+   
+   MessageView *view = [self.views objectForKey:@((int)offset)];
+   
+   if ((NSNull *)view == [NSNull null])
+   {
+      view = [[MessageView alloc] initWithFrame:CGRectMake(0, offsetTop, bounds.size.width, bounds.size.height) andAuthor:[msg objectForKey:@"username"] andContent:[msg objectForKey:@"content"]];
+      [self.views setObject:view forKey:@((int)offset)];
+   }
+   // add the controller's view to the scroll view
+   if (view.superview == nil)
+   {
+      CGRect frame = self.scrollView.frame;
+      frame.origin.x = CGRectGetWidth(frame) * offset;
+      frame.origin.y = 0;
+      view.frame = frame;
+      
+      [self.scrollView addSubview:view];
+   }
+}
+
+
+// at the end of scroll animation, reset the boolean used when scrolls originate from the UIPageControl
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+   if(scrollView == self.scrollView){
+      
+   
+      CGFloat pageWidth = CGRectGetWidth(self.scrollView.frame);
+      NSUInteger offset= floor((self.scrollView.contentOffset.x - pageWidth / 2) / pageWidth) + 1;
+      if(self.offset == offset && self.offset < self.total){
+         self.pageControl.currentPage = offset;
+         
+         [self getMessages];
+         
+         //Nothing happens, we're still on the same page
+         return;
+      }
+      NSUInteger numResponses = self.total;
+
+      
+      if(offset > 0){
+         [self loadScrollViewWithOffset:offset - 1];
+      }
+      [self loadScrollViewWithOffset:offset];
+      if(offset< numResponses - 1){
+         [self loadScrollViewWithOffset:offset + 1];
+      }
+      if(offset < numResponses - 2){
+         [self loadScrollViewWithOffset:offset + 2];
+      }
+   }
+}
+
+- (void)gotoOffset:(BOOL)animated
+{
+   NSInteger offset = self.pageControl.currentPage;
+   
+   // load the visible page and the page on either side of it (to avoid flashes when the user starts scrolling)
+   if(offset >0){
+      [self loadScrollViewWithOffset:offset - 1];
+   }
+   [self loadScrollViewWithOffset:offset];
+   
+   if(offset < self.total - 1){
+      [self loadScrollViewWithOffset:offset + 1];
+   }
+   
+   // update the scroll view to the appropriate page
+   CGRect bounds = self.scrollView.bounds;
+   bounds.origin.x = CGRectGetWidth(bounds) * offset;
+   bounds.origin.y = 0;
+   [self.scrollView scrollRectToVisible:bounds animated:animated];
+}
+
+
+
 - (void) getMessages
 {
    if(self.total == 0)
@@ -164,7 +318,7 @@
       [self getCount];
    }
    
-   NSURL *url = [NSURL URLWithString:[NSString stringWithFormat: @"http://0.0.0.0:3000/messages/%d.json", self.offset]];
+   NSURL *url = [NSURL URLWithString:[NSString stringWithFormat: @"http://0.0.0.0:3000/messages/selection/%d.json", self.offset]];
 
    
    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url
@@ -209,10 +363,13 @@
    
 }
 
+
 - (IBAction)show:(id)sender {
    self.messagesTable.hidden = NO;
    self.hideAll.hidden = NO;
    self.viewAll.hidden = YES;
+   self.pagesViewButton.hidden = NO;
+   
 
 }
 
@@ -221,6 +378,9 @@
    self.messagesTable.hidden =YES;
    self.hideAll.hidden = YES;
    self.viewAll.hidden = NO;
+   self.pagesViewButton.hidden = YES;
+   self.scrollView.hidden = YES;
+   self.pageControl.hidden = YES;
 }
 
 
@@ -232,7 +392,7 @@
    if (self.offset == 0) {
       return 1;
    }
-   if([self.messages count] <= self.total)
+   if([self.messages count] < self.total)
       return [self.messages count] +1;
    else
       return self.total;

@@ -22,6 +22,7 @@
 		B51F918A182B386300D28036 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B51F9169182B386200D28036 /* UIKit.framework */; };
 		B51F9192182B386300D28036 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B51F9190182B386300D28036 /* InfoPlist.strings */; };
 		B51F9194182B386400D28036 /* Mobile_MessageHubTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B51F9193182B386400D28036 /* Mobile_MessageHubTests.m */; };
+		B56A40DD18529480000F5778 /* MessageView.m in Sources */ = {isa = PBXBuildFile; fileRef = B56A40DC18529480000F5778 /* MessageView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,8 @@
 		B51F918F182B386300D28036 /* Mobile MessageHubTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Mobile MessageHubTests-Info.plist"; sourceTree = "<group>"; };
 		B51F9191182B386300D28036 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B51F9193182B386400D28036 /* Mobile_MessageHubTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Mobile_MessageHubTests.m; sourceTree = "<group>"; };
+		B56A40DB18529480000F5778 /* MessageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageView.h; sourceTree = "<group>"; };
+		B56A40DC18529480000F5778 /* MessageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +123,8 @@
 				B51F917A182B386200D28036 /* Main_iPad.storyboard */,
 				B51F917D182B386300D28036 /* ViewController.h */,
 				B51F917E182B386300D28036 /* ViewController.m */,
+				B56A40DB18529480000F5778 /* MessageView.h */,
+				B56A40DC18529480000F5778 /* MessageView.m */,
 				B51F9180182B386300D28036 /* Images.xcassets */,
 				B51F916C182B386200D28036 /* Supporting Files */,
 			);
@@ -253,6 +258,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B56A40DD18529480000F5778 /* MessageView.m in Sources */,
 				B51F917F182B386300D28036 /* ViewController.m in Sources */,
 				B51F9176182B386200D28036 /* AppDelegate.m in Sources */,
 				B51F9172182B386200D28036 /* main.m in Sources */,
